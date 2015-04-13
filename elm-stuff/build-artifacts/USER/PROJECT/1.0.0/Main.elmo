@@ -1,0 +1,260 @@
+Elm.Main = Elm.Main || {};
+Elm.Main.make = function (_elm) {
+   "use strict";
+   _elm.Main = _elm.Main || {};
+   if (_elm.Main.values)
+   return _elm.Main.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Main",
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Keyboard = Elm.Keyboard.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $Window = Elm.Window.make(_elm);
+   var wallLine = $Graphics$Collage.solid($Color.blue);
+   var playerLine = _U.replace([["color"
+                                ,$Color.green]
+                               ,["width",8]
+                               ,["cap"
+                                ,$Graphics$Collage.Round]],
+   $Graphics$Collage.defaultLine);
+   var lineSegment = function (l) {
+      return A2($Graphics$Collage.segment,
+      {ctor: "_Tuple2"
+      ,_0: l.x
+      ,_1: l.y},
+      {ctor: "_Tuple2"
+      ,_0: l.x + l.length * $Basics.cos(l.angle)
+      ,_1: l.y + l.length * $Basics.sin(l.angle)});
+   };
+   var floatMod = F2(function (x,
+   m) {
+      return x - m * $Basics.toFloat($Basics.floor(x / m));
+   });
+   var normalizeAngle = function (theta) {
+      return A2(floatMod,
+      theta,
+      2 * $Basics.pi);
+   };
+   var fps$ = function (n) {
+      return A2($Signal.map,
+      function (x) {
+         return x / 1000;
+      },
+      $Time.fps(n));
+   };
+   var clock = fps$(60);
+   var wallForm = function (w) {
+      return A2($Graphics$Collage.traced,
+      wallLine,
+      A2($Graphics$Collage.segment,
+      {ctor: "_Tuple2"
+      ,_0: w.x1
+      ,_1: w.y1},
+      {ctor: "_Tuple2"
+      ,_0: w.x2
+      ,_1: w.y2}));
+   };
+   var render = F3(function (_v0,
+   _v1,
+   game) {
+      return function () {
+         switch (_v1.ctor)
+         {case "_Tuple2":
+            return function () {
+                 switch (_v0.ctor)
+                 {case "_Tuple2":
+                    return function () {
+                         var playerForm = A2($Graphics$Collage.traced,
+                         playerLine,
+                         lineSegment(game.player));
+                         var wallForms = A2($List.map,
+                         wallForm,
+                         game.walls);
+                         var forms = A2($List._op["::"],
+                         playerForm,
+                         wallForms);
+                         var h = $Basics.toFloat(_v0._1);
+                         var w = $Basics.toFloat(_v0._0);
+                         return A3($Graphics$Collage.collage,
+                         _v0._0,
+                         _v0._1,
+                         forms);
+                      }();}
+                 _U.badCase($moduleName,
+                 "between lines 83 and 89");
+              }();}
+         _U.badCase($moduleName,
+         "between lines 83 and 89");
+      }();
+   });
+   var input = A2($Signal.sampleOn,
+   clock,
+   A3($Signal.map2,
+   F2(function (v0,v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   }),
+   clock,
+   $Keyboard.space));
+   var moveLine = F2(function (dt,
+   line) {
+      return function () {
+         var _v8 = line.motion;
+         switch (_v8.ctor)
+         {case "Forward":
+            return function () {
+                 var dy = _v8._0 * dt * $Basics.sin(line.angle);
+                 var dx = _v8._0 * dt * $Basics.cos(line.angle);
+                 return _U.replace([["x"
+                                    ,line.x + dx]
+                                   ,["y",line.y + dy]],
+                 line);
+              }();
+            case "Rotating":
+            return _U.replace([["angle"
+                               ,normalizeAngle(line.angle + _v8._0 * dt)]],
+              line);}
+         _U.badCase($moduleName,
+         "between lines 41 and 46");
+      }();
+   });
+   var GameData = F2(function (a,
+   b) {
+      return {_: {}
+             ,player: b
+             ,walls: a};
+   });
+   var simpleMap = _L.fromArray([{_: {}
+                                 ,x1: -200
+                                 ,x2: 200
+                                 ,y1: -200
+                                 ,y2: -200}
+                                ,{_: {}
+                                 ,x1: 200
+                                 ,x2: 200
+                                 ,y1: -200
+                                 ,y2: 200}
+                                ,{_: {}
+                                 ,x1: 200
+                                 ,x2: -200
+                                 ,y1: 200
+                                 ,y2: 200}
+                                ,{_: {}
+                                 ,x1: -200
+                                 ,x2: -200
+                                 ,y1: 200
+                                 ,y2: -200}]);
+   var Wall = F4(function (a,
+   b,
+   c,
+   d) {
+      return {_: {}
+             ,x1: a
+             ,x2: c
+             ,y1: b
+             ,y2: d};
+   });
+   var Rotating = function (a) {
+      return {ctor: "Rotating"
+             ,_0: a};
+   };
+   var simpleGame = {_: {}
+                    ,player: {_: {}
+                             ,angle: $Basics.pi / 6
+                             ,length: 50
+                             ,motion: Rotating(2 * $Basics.pi)
+                             ,x: 0
+                             ,y: 0}
+                    ,walls: simpleMap};
+   var Forward = function (a) {
+      return {ctor: "Forward"
+             ,_0: a};
+   };
+   var handleInput = F2(function (spaceDown,
+   line) {
+      return spaceDown ? function () {
+         var _v11 = line.motion;
+         switch (_v11.ctor)
+         {case "Forward": return line;
+            case "Rotating":
+            return _U.replace([["motion"
+                               ,Forward(200)]],
+              line);}
+         _U.badCase($moduleName,
+         "between lines 50 and 53");
+      }() : line;
+   });
+   var updateGame = F2(function (_v14,
+   game) {
+      return function () {
+         switch (_v14.ctor)
+         {case "_Tuple2":
+            return _U.replace([["player"
+                               ,handleInput(_v14._1)(moveLine(_v14._0)(game.player))]],
+              game);}
+         _U.badCase($moduleName,
+         "between lines 58 and 60");
+      }();
+   });
+   var evolvedGame = function (startState) {
+      return A3($Signal.foldp,
+      updateGame,
+      startState,
+      input);
+   };
+   var main = A2($Signal._op["~"],
+   A2($Signal._op["~"],
+   A2($Signal._op["<~"],
+   render,
+   $Window.dimensions),
+   $Signal.constant({ctor: "_Tuple2"
+                    ,_0: 0
+                    ,_1: 0})),
+   evolvedGame(simpleGame));
+   var LineData = F5(function (a,
+   b,
+   c,
+   d,
+   e) {
+      return {_: {}
+             ,angle: c
+             ,length: d
+             ,motion: e
+             ,x: a
+             ,y: b};
+   });
+   _elm.Main.values = {_op: _op
+                      ,LineData: LineData
+                      ,Forward: Forward
+                      ,Rotating: Rotating
+                      ,Wall: Wall
+                      ,simpleMap: simpleMap
+                      ,GameData: GameData
+                      ,moveLine: moveLine
+                      ,handleInput: handleInput
+                      ,updateGame: updateGame
+                      ,evolvedGame: evolvedGame
+                      ,input: input
+                      ,simpleGame: simpleGame
+                      ,render: render
+                      ,wallForm: wallForm
+                      ,main: main
+                      ,fps$: fps$
+                      ,clock: clock
+                      ,floatMod: floatMod
+                      ,normalizeAngle: normalizeAngle
+                      ,lineSegment: lineSegment
+                      ,playerLine: playerLine
+                      ,wallLine: wallLine};
+   return _elm.Main.values;
+};
