@@ -637,6 +637,145 @@ Elm.Color.make = function (_elm) {
                        ,darkCharcoal: darkCharcoal};
    return _elm.Color.values;
 };
+Elm.Debug = Elm.Debug || {};
+Elm.Debug.make = function (_elm) {
+   "use strict";
+   _elm.Debug = _elm.Debug || {};
+   if (_elm.Debug.values)
+   return _elm.Debug.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Debug",
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
+   $Native$Debug = Elm.Native.Debug.make(_elm);
+   var trace = $Native$Debug.tracePath;
+   var watchSummary = $Native$Debug.watchSummary;
+   var watch = $Native$Debug.watch;
+   var crash = $Native$Debug.crash;
+   var log = $Native$Debug.log;
+   _elm.Debug.values = {_op: _op
+                       ,log: log
+                       ,crash: crash
+                       ,watch: watch
+                       ,watchSummary: watchSummary
+                       ,trace: trace};
+   return _elm.Debug.values;
+};
+Elm.Geometry = Elm.Geometry || {};
+Elm.Geometry.make = function (_elm) {
+   "use strict";
+   _elm.Geometry = _elm.Geometry || {};
+   if (_elm.Geometry.values)
+   return _elm.Geometry.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Geometry",
+   $Basics = Elm.Basics.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm);
+   var unitVec = function (theta) {
+      return {_: {}
+             ,x: $Basics.cos(theta)
+             ,y: $Basics.sin(theta)};
+   };
+   var between = F3(function (v0,
+   v1,
+   v) {
+      return _U.cmp((v0.x - v.x) * (v1.x - v.x) + (v0.y - v.y) * (v1.y - v.y),
+      0) < 1;
+   });
+   var segLine = F2(function (v0,
+   v1) {
+      return function () {
+         var dy = v1.y - v0.y;
+         var dx = v1.x - v0.x;
+         return {_: {}
+                ,a: 0 - dy
+                ,b: dx
+                ,c: dx * v0.y - dy * v0.x};
+      }();
+   });
+   var fromV2 = function (v) {
+      return {ctor: "_Tuple2"
+             ,_0: v.x
+             ,_1: v.y};
+   };
+   var toV2 = F2(function (x,y) {
+      return {_: {},x: x,y: y};
+   });
+   var rayLineIntersection = F2(function (r,
+   l) {
+      return _U.eq(l.a * r.dv.x + l.b * r.dv.y,
+      0) ? $Maybe.Nothing : $Maybe.Just((l.c - l.a * r.v0.x - l.b * r.v0.y) / (l.a * r.dv.x + l.b * r.dv.y));
+   });
+   _op[".+"] = F2(function (v1,
+   v2) {
+      return {_: {}
+             ,x: v1.x + v2.x
+             ,y: v1.y + v2.y};
+   });
+   _op[".*"] = F2(function (c,v) {
+      return {_: {}
+             ,x: c * v.x
+             ,y: c * v.y};
+   });
+   var evalRay = F2(function (ray,
+   t) {
+      return A2(_op[".+"],
+      ray.v0,
+      A2(_op[".*"],t,ray.dv));
+   });
+   var lineNormal = function (l) {
+      return {_: {},x: l.a,y: l.b};
+   };
+   var intersection = F2(function (l1,
+   l2) {
+      return function () {
+         var det = l1.a * l2.b - l1.b * l2.a;
+         return _U.eq(det,
+         0) ? $Maybe.Nothing : $Maybe.Just({_: {}
+                                           ,x: (l2.b * l1.c - l1.b * l2.c) / det
+                                           ,y: (l1.a * l2.c - l2.a * l1.c) / det});
+      }();
+   });
+   var Seg2 = F2(function (a,b) {
+      return {_: {},v0: a,v1: b};
+   });
+   var Ray2 = F2(function (a,b) {
+      return {_: {},dv: b,v0: a};
+   });
+   var Line2 = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,a: a
+             ,b: b
+             ,c: c};
+   });
+   var V2 = F2(function (a,b) {
+      return {_: {},x: a,y: b};
+   });
+   _elm.Geometry.values = {_op: _op
+                          ,V2: V2
+                          ,Line2: Line2
+                          ,Ray2: Ray2
+                          ,Seg2: Seg2
+                          ,intersection: intersection
+                          ,lineNormal: lineNormal
+                          ,evalRay: evalRay
+                          ,rayLineIntersection: rayLineIntersection
+                          ,toV2: toV2
+                          ,fromV2: fromV2
+                          ,segLine: segLine
+                          ,between: between
+                          ,unitVec: unitVec};
+   return _elm.Geometry.values;
+};
 Elm.Graphics = Elm.Graphics || {};
 Elm.Graphics.Collage = Elm.Graphics.Collage || {};
 Elm.Graphics.Collage.make = function (_elm) {
@@ -1830,10 +1969,13 @@ Elm.Main.make = function (_elm) {
    $moduleName = "Main",
    $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Geometry = Elm.Geometry.make(_elm),
    $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $Keyboard = Elm.Keyboard.make(_elm),
    $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $Time = Elm.Time.make(_elm),
    $Window = Elm.Window.make(_elm);
@@ -1908,10 +2050,10 @@ Elm.Main.make = function (_elm) {
                          forms);
                       }();}
                  _U.badCase($moduleName,
-                 "between lines 83 and 89");
+                 "between lines 155 and 161");
               }();}
          _U.badCase($moduleName,
-         "between lines 83 and 89");
+         "between lines 155 and 161");
       }();
    });
    var input = A2($Signal.sampleOn,
@@ -1924,6 +2066,15 @@ Elm.Main.make = function (_elm) {
    }),
    clock,
    $Keyboard.space));
+   var flipLine = function (line) {
+      return _U.replace([["x"
+                         ,line.x + line.length * $Basics.cos(line.angle)]
+                        ,["y"
+                         ,line.y + line.length * $Basics.sin(line.angle)]
+                        ,["angle"
+                         ,normalizeAngle(line.angle + $Basics.pi)]],
+      line);
+   };
    var moveLine = F2(function (dt,
    line) {
       return function () {
@@ -1943,7 +2094,7 @@ Elm.Main.make = function (_elm) {
                                ,normalizeAngle(line.angle + _v8._0 * dt)]],
               line);}
          _U.badCase($moduleName,
-         "between lines 41 and 46");
+         "between lines 79 and 84");
       }();
    });
    var GameData = F2(function (a,
@@ -1951,6 +2102,98 @@ Elm.Main.make = function (_elm) {
       return {_: {}
              ,player: b
              ,walls: a};
+   });
+   var playerRay = function (line) {
+      return function () {
+         var _v11 = line.motion;
+         switch (_v11.ctor)
+         {case "Forward":
+            return $Maybe.Just({_: {}
+                               ,dv: A2($Geometry.toV2,
+                               _v11._0 * $Basics.cos(line.angle),
+                               _v11._0 * $Basics.sin(line.angle))
+                               ,v0: A2($Geometry.toV2,
+                               line.x + line.length * $Basics.cos(line.angle),
+                               line.y + line.length * $Basics.sin(line.angle))});}
+         return $Maybe.Nothing;
+      }();
+   };
+   var minMaybe = F2(function (f1,
+   f2) {
+      return function () {
+         switch (f1.ctor)
+         {case "Just":
+            return function () {
+                 switch (f2.ctor)
+                 {case "Just":
+                    return $Maybe.Just(A2($Basics.min,
+                      f1._0,
+                      f2._0));
+                    case "Nothing":
+                    return $Maybe.Just(f1._0);}
+                 _U.badCase($moduleName,
+                 "between lines 51 and 54");
+              }();
+            case "Nothing": return f2;}
+         _U.badCase($moduleName,
+         "between lines 50 and 54");
+      }();
+   });
+   var rayWallIntersection = F2(function (r,
+   w) {
+      return function () {
+         var v2 = A2($Geometry.toV2,
+         w.x2,
+         w.y2);
+         var v1 = A2($Geometry.toV2,
+         w.x1,
+         w.y1);
+         var l = A2($Geometry.segLine,
+         v1,
+         v2);
+         return function () {
+            var _v17 = A2($Geometry.rayLineIntersection,
+            r,
+            l);
+            switch (_v17.ctor)
+            {case "Just":
+               return _U.cmp(_v17._0,
+                 0) > -1 && A3($Geometry.between,
+                 v1,
+                 v2,
+                 A2($Geometry.evalRay,
+                 r,
+                 _v17._0)) ? $Maybe.Just(_v17._0) : $Maybe.Nothing;
+               case "Nothing":
+               return $Maybe.Nothing;}
+            _U.badCase($moduleName,
+            "between lines 43 and 47");
+         }();
+      }();
+   });
+   var nextCollisionForRay = F2(function (r,
+   ws) {
+      return A3($List.foldr,
+      minMaybe,
+      $Maybe.Nothing,
+      A2($List.map,
+      rayWallIntersection(r),
+      ws));
+   });
+   var nextCollision = F2(function (line,
+   walls) {
+      return function () {
+         var _v19 = playerRay(line);
+         switch (_v19.ctor)
+         {case "Just":
+            return A2(nextCollisionForRay,
+              _v19._0,
+              walls);
+            case "Nothing":
+            return $Maybe.Nothing;}
+         _U.badCase($moduleName,
+         "between lines 69 and 71");
+      }();
    });
    var simpleMap = _L.fromArray([{_: {}
                                  ,x1: -200
@@ -1986,6 +2229,11 @@ Elm.Main.make = function (_elm) {
       return {ctor: "Rotating"
              ,_0: a};
    };
+   var handleCollision = function (line) {
+      return flipLine(_U.replace([["motion"
+                                  ,Rotating(2 * $Basics.pi)]],
+      line));
+   };
    var simpleGame = {_: {}
                     ,player: {_: {}
                              ,angle: $Basics.pi / 6
@@ -2001,27 +2249,47 @@ Elm.Main.make = function (_elm) {
    var handleInput = F2(function (spaceDown,
    line) {
       return spaceDown ? function () {
-         var _v11 = line.motion;
-         switch (_v11.ctor)
+         var _v21 = line.motion;
+         switch (_v21.ctor)
          {case "Forward": return line;
             case "Rotating":
             return _U.replace([["motion"
                                ,Forward(200)]],
               line);}
          _U.badCase($moduleName,
-         "between lines 50 and 53");
+         "between lines 96 and 99");
       }() : line;
    });
-   var updateGame = F2(function (_v14,
+   var updateGame = F2(function (_v24,
    game) {
       return function () {
-         switch (_v14.ctor)
+         switch (_v24.ctor)
          {case "_Tuple2":
-            return _U.replace([["player"
-                               ,handleInput(_v14._1)(moveLine(_v14._0)(game.player))]],
-              game);}
+            return function () {
+                 var _v28 = A2($Debug.watch,
+                 "collision",
+                 A2(nextCollision,
+                 game.player,
+                 game.walls));
+                 switch (_v28.ctor)
+                 {case "Just":
+                    return _U.cmp(A2($Debug.watch,
+                      "dt gap",
+                      _v28._0 - _v24._0),
+                      0) > -1 ? _U.replace([["player"
+                                            ,$Debug.watch("player")(handleInput(_v24._1)(moveLine(_v24._0)(game.player)))]],
+                      game) : _U.replace([["player"
+                                          ,$Debug.watch("player")(moveLine(_v24._0 - _v28._0)(handleCollision(moveLine(_v28._0)(game.player))))]],
+                      game);
+                    case "Nothing":
+                    return _U.replace([["player"
+                                       ,$Debug.watch("player")(handleInput(_v24._1)(moveLine(_v24._0)(game.player)))]],
+                      game);}
+                 _U.badCase($moduleName,
+                 "between lines 109 and 133");
+              }();}
          _U.badCase($moduleName,
-         "between lines 58 and 60");
+         "between lines 109 and 133");
       }();
    });
    var evolvedGame = function (startState) {
@@ -2057,9 +2325,16 @@ Elm.Main.make = function (_elm) {
                       ,Rotating: Rotating
                       ,Wall: Wall
                       ,simpleMap: simpleMap
+                      ,rayWallIntersection: rayWallIntersection
+                      ,minMaybe: minMaybe
+                      ,nextCollisionForRay: nextCollisionForRay
+                      ,playerRay: playerRay
+                      ,nextCollision: nextCollision
                       ,GameData: GameData
                       ,moveLine: moveLine
+                      ,flipLine: flipLine
                       ,handleInput: handleInput
+                      ,handleCollision: handleCollision
                       ,updateGame: updateGame
                       ,evolvedGame: evolvedGame
                       ,input: input
@@ -2298,6 +2573,70 @@ Elm.Native.Color.make = function(elm) {
         toCss:toCss
     };
 
+};
+
+Elm.Native.Debug = {};
+Elm.Native.Debug.make = function(elm) {
+    elm.Native = elm.Native || {};
+    elm.Native.Debug = elm.Native.Debug || {};
+    if (elm.Native.Debug.values)
+    {
+        return elm.Native.Debug.values;
+    }
+
+    var toString = Elm.Native.Show.make(elm).toString;
+
+    function log(tag, value)
+    {
+        var msg = tag + ': ' + toString(value);
+        var process = process || {};
+        if (process.stdout) {
+            process.stdout.write(msg);
+        } else {
+            console.log(msg);
+        }
+        return value;
+    }
+
+    function crash(message)
+    {
+        throw new Error(message);
+    }
+
+    function tracePath(tag, form)
+    {
+        if (elm.debug)
+        {
+            return elm.debug.trace(tag, form);
+        }
+        return form;
+    }
+
+    function watch(tag, value)
+    {
+        if (elm.debug)
+        {
+            elm.debug.watch(tag, value);
+        }
+        return value;
+    }
+
+    function watchSummary(tag, summarize, value)
+    {
+        if (elm.debug)
+        {
+            elm.debug.watch(tag, summarize(value));
+        }
+        return value;
+    }
+
+    return elm.Native.Debug.values = {
+        crash: crash,
+        tracePath: F2(tracePath),
+        log: F2(log),
+        watch: F2(watch),
+        watchSummary:F3(watchSummary),
+    };
 };
 
 

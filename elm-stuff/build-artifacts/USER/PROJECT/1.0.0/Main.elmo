@@ -12,10 +12,13 @@ Elm.Main.make = function (_elm) {
    $moduleName = "Main",
    $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Geometry = Elm.Geometry.make(_elm),
    $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $Keyboard = Elm.Keyboard.make(_elm),
    $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $Time = Elm.Time.make(_elm),
    $Window = Elm.Window.make(_elm);
@@ -90,10 +93,10 @@ Elm.Main.make = function (_elm) {
                          forms);
                       }();}
                  _U.badCase($moduleName,
-                 "between lines 83 and 89");
+                 "between lines 155 and 161");
               }();}
          _U.badCase($moduleName,
-         "between lines 83 and 89");
+         "between lines 155 and 161");
       }();
    });
    var input = A2($Signal.sampleOn,
@@ -106,6 +109,15 @@ Elm.Main.make = function (_elm) {
    }),
    clock,
    $Keyboard.space));
+   var flipLine = function (line) {
+      return _U.replace([["x"
+                         ,line.x + line.length * $Basics.cos(line.angle)]
+                        ,["y"
+                         ,line.y + line.length * $Basics.sin(line.angle)]
+                        ,["angle"
+                         ,normalizeAngle(line.angle + $Basics.pi)]],
+      line);
+   };
    var moveLine = F2(function (dt,
    line) {
       return function () {
@@ -125,7 +137,7 @@ Elm.Main.make = function (_elm) {
                                ,normalizeAngle(line.angle + _v8._0 * dt)]],
               line);}
          _U.badCase($moduleName,
-         "between lines 41 and 46");
+         "between lines 79 and 84");
       }();
    });
    var GameData = F2(function (a,
@@ -133,6 +145,98 @@ Elm.Main.make = function (_elm) {
       return {_: {}
              ,player: b
              ,walls: a};
+   });
+   var playerRay = function (line) {
+      return function () {
+         var _v11 = line.motion;
+         switch (_v11.ctor)
+         {case "Forward":
+            return $Maybe.Just({_: {}
+                               ,dv: A2($Geometry.toV2,
+                               _v11._0 * $Basics.cos(line.angle),
+                               _v11._0 * $Basics.sin(line.angle))
+                               ,v0: A2($Geometry.toV2,
+                               line.x + line.length * $Basics.cos(line.angle),
+                               line.y + line.length * $Basics.sin(line.angle))});}
+         return $Maybe.Nothing;
+      }();
+   };
+   var minMaybe = F2(function (f1,
+   f2) {
+      return function () {
+         switch (f1.ctor)
+         {case "Just":
+            return function () {
+                 switch (f2.ctor)
+                 {case "Just":
+                    return $Maybe.Just(A2($Basics.min,
+                      f1._0,
+                      f2._0));
+                    case "Nothing":
+                    return $Maybe.Just(f1._0);}
+                 _U.badCase($moduleName,
+                 "between lines 51 and 54");
+              }();
+            case "Nothing": return f2;}
+         _U.badCase($moduleName,
+         "between lines 50 and 54");
+      }();
+   });
+   var rayWallIntersection = F2(function (r,
+   w) {
+      return function () {
+         var v2 = A2($Geometry.toV2,
+         w.x2,
+         w.y2);
+         var v1 = A2($Geometry.toV2,
+         w.x1,
+         w.y1);
+         var l = A2($Geometry.segLine,
+         v1,
+         v2);
+         return function () {
+            var _v17 = A2($Geometry.rayLineIntersection,
+            r,
+            l);
+            switch (_v17.ctor)
+            {case "Just":
+               return _U.cmp(_v17._0,
+                 0) > -1 && A3($Geometry.between,
+                 v1,
+                 v2,
+                 A2($Geometry.evalRay,
+                 r,
+                 _v17._0)) ? $Maybe.Just(_v17._0) : $Maybe.Nothing;
+               case "Nothing":
+               return $Maybe.Nothing;}
+            _U.badCase($moduleName,
+            "between lines 43 and 47");
+         }();
+      }();
+   });
+   var nextCollisionForRay = F2(function (r,
+   ws) {
+      return A3($List.foldr,
+      minMaybe,
+      $Maybe.Nothing,
+      A2($List.map,
+      rayWallIntersection(r),
+      ws));
+   });
+   var nextCollision = F2(function (line,
+   walls) {
+      return function () {
+         var _v19 = playerRay(line);
+         switch (_v19.ctor)
+         {case "Just":
+            return A2(nextCollisionForRay,
+              _v19._0,
+              walls);
+            case "Nothing":
+            return $Maybe.Nothing;}
+         _U.badCase($moduleName,
+         "between lines 69 and 71");
+      }();
    });
    var simpleMap = _L.fromArray([{_: {}
                                  ,x1: -200
@@ -168,6 +272,11 @@ Elm.Main.make = function (_elm) {
       return {ctor: "Rotating"
              ,_0: a};
    };
+   var handleCollision = function (line) {
+      return flipLine(_U.replace([["motion"
+                                  ,Rotating(2 * $Basics.pi)]],
+      line));
+   };
    var simpleGame = {_: {}
                     ,player: {_: {}
                              ,angle: $Basics.pi / 6
@@ -183,27 +292,47 @@ Elm.Main.make = function (_elm) {
    var handleInput = F2(function (spaceDown,
    line) {
       return spaceDown ? function () {
-         var _v11 = line.motion;
-         switch (_v11.ctor)
+         var _v21 = line.motion;
+         switch (_v21.ctor)
          {case "Forward": return line;
             case "Rotating":
             return _U.replace([["motion"
                                ,Forward(200)]],
               line);}
          _U.badCase($moduleName,
-         "between lines 50 and 53");
+         "between lines 96 and 99");
       }() : line;
    });
-   var updateGame = F2(function (_v14,
+   var updateGame = F2(function (_v24,
    game) {
       return function () {
-         switch (_v14.ctor)
+         switch (_v24.ctor)
          {case "_Tuple2":
-            return _U.replace([["player"
-                               ,handleInput(_v14._1)(moveLine(_v14._0)(game.player))]],
-              game);}
+            return function () {
+                 var _v28 = A2($Debug.watch,
+                 "collision",
+                 A2(nextCollision,
+                 game.player,
+                 game.walls));
+                 switch (_v28.ctor)
+                 {case "Just":
+                    return _U.cmp(A2($Debug.watch,
+                      "dt gap",
+                      _v28._0 - _v24._0),
+                      0) > -1 ? _U.replace([["player"
+                                            ,$Debug.watch("player")(handleInput(_v24._1)(moveLine(_v24._0)(game.player)))]],
+                      game) : _U.replace([["player"
+                                          ,$Debug.watch("player")(moveLine(_v24._0 - _v28._0)(handleCollision(moveLine(_v28._0)(game.player))))]],
+                      game);
+                    case "Nothing":
+                    return _U.replace([["player"
+                                       ,$Debug.watch("player")(handleInput(_v24._1)(moveLine(_v24._0)(game.player)))]],
+                      game);}
+                 _U.badCase($moduleName,
+                 "between lines 109 and 133");
+              }();}
          _U.badCase($moduleName,
-         "between lines 58 and 60");
+         "between lines 109 and 133");
       }();
    });
    var evolvedGame = function (startState) {
@@ -239,9 +368,16 @@ Elm.Main.make = function (_elm) {
                       ,Rotating: Rotating
                       ,Wall: Wall
                       ,simpleMap: simpleMap
+                      ,rayWallIntersection: rayWallIntersection
+                      ,minMaybe: minMaybe
+                      ,nextCollisionForRay: nextCollisionForRay
+                      ,playerRay: playerRay
+                      ,nextCollision: nextCollision
                       ,GameData: GameData
                       ,moveLine: moveLine
+                      ,flipLine: flipLine
                       ,handleInput: handleInput
+                      ,handleCollision: handleCollision
                       ,updateGame: updateGame
                       ,evolvedGame: evolvedGame
                       ,input: input

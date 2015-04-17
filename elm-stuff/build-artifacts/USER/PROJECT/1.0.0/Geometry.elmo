@@ -1,0 +1,112 @@
+Elm.Geometry = Elm.Geometry || {};
+Elm.Geometry.make = function (_elm) {
+   "use strict";
+   _elm.Geometry = _elm.Geometry || {};
+   if (_elm.Geometry.values)
+   return _elm.Geometry.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Geometry",
+   $Basics = Elm.Basics.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm);
+   var unitVec = function (theta) {
+      return {_: {}
+             ,x: $Basics.cos(theta)
+             ,y: $Basics.sin(theta)};
+   };
+   var between = F3(function (v0,
+   v1,
+   v) {
+      return _U.cmp((v0.x - v.x) * (v1.x - v.x) + (v0.y - v.y) * (v1.y - v.y),
+      0) < 1;
+   });
+   var segLine = F2(function (v0,
+   v1) {
+      return function () {
+         var dy = v1.y - v0.y;
+         var dx = v1.x - v0.x;
+         return {_: {}
+                ,a: 0 - dy
+                ,b: dx
+                ,c: dx * v0.y - dy * v0.x};
+      }();
+   });
+   var fromV2 = function (v) {
+      return {ctor: "_Tuple2"
+             ,_0: v.x
+             ,_1: v.y};
+   };
+   var toV2 = F2(function (x,y) {
+      return {_: {},x: x,y: y};
+   });
+   var rayLineIntersection = F2(function (r,
+   l) {
+      return _U.eq(l.a * r.dv.x + l.b * r.dv.y,
+      0) ? $Maybe.Nothing : $Maybe.Just((l.c - l.a * r.v0.x - l.b * r.v0.y) / (l.a * r.dv.x + l.b * r.dv.y));
+   });
+   _op[".+"] = F2(function (v1,
+   v2) {
+      return {_: {}
+             ,x: v1.x + v2.x
+             ,y: v1.y + v2.y};
+   });
+   _op[".*"] = F2(function (c,v) {
+      return {_: {}
+             ,x: c * v.x
+             ,y: c * v.y};
+   });
+   var evalRay = F2(function (ray,
+   t) {
+      return A2(_op[".+"],
+      ray.v0,
+      A2(_op[".*"],t,ray.dv));
+   });
+   var lineNormal = function (l) {
+      return {_: {},x: l.a,y: l.b};
+   };
+   var intersection = F2(function (l1,
+   l2) {
+      return function () {
+         var det = l1.a * l2.b - l1.b * l2.a;
+         return _U.eq(det,
+         0) ? $Maybe.Nothing : $Maybe.Just({_: {}
+                                           ,x: (l2.b * l1.c - l1.b * l2.c) / det
+                                           ,y: (l1.a * l2.c - l2.a * l1.c) / det});
+      }();
+   });
+   var Seg2 = F2(function (a,b) {
+      return {_: {},v0: a,v1: b};
+   });
+   var Ray2 = F2(function (a,b) {
+      return {_: {},dv: b,v0: a};
+   });
+   var Line2 = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,a: a
+             ,b: b
+             ,c: c};
+   });
+   var V2 = F2(function (a,b) {
+      return {_: {},x: a,y: b};
+   });
+   _elm.Geometry.values = {_op: _op
+                          ,V2: V2
+                          ,Line2: Line2
+                          ,Ray2: Ray2
+                          ,Seg2: Seg2
+                          ,intersection: intersection
+                          ,lineNormal: lineNormal
+                          ,evalRay: evalRay
+                          ,rayLineIntersection: rayLineIntersection
+                          ,toV2: toV2
+                          ,fromV2: fromV2
+                          ,segLine: segLine
+                          ,between: between
+                          ,unitVec: unitVec};
+   return _elm.Geometry.values;
+};
